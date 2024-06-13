@@ -1,16 +1,22 @@
 #!/bin/bash
 
-# Start date: April 1, 2024
-start_date="2024-04-01"
-# End date: September 30, 2024
-end_date="2024-09-30"
+# Start date: same day last year
+start_date=$(date -d "last year" +%Y-%m-%d)
+
+# Number of days to loop (120 days)
+no_of_days=120
 
 # Create the file if it doesn't exist
 touch green.txt
 
-# Loop through each day between start and end date
+# Function to increment date
+increment_date() {
+    date -d "$1 + 1 day" +%Y-%m-%d
+}
+
+# Loop through each day for 120 days from the start date
 current_date="$start_date"
-while [[ "$current_date" < "$end_date" ]]; do
+for ((i=0; i<$no_of_days; i++)); do
     # Get the day of the week (1=Monday, 7=Sunday)
     day_of_week=$(date -d "$current_date" +%u)
     
@@ -19,7 +25,7 @@ while [[ "$current_date" < "$end_date" ]]; do
     
     if ((skip_day < 3)); then
         echo "Skipping $current_date"
-        current_date=$(date -I -d "$current_date +1 day")  # Use ISO format for the date
+        current_date=$(increment_date "$current_date")
         continue
     fi
 
@@ -40,11 +46,11 @@ while [[ "$current_date" < "$end_date" ]]; do
         done
     fi
 
-    # Move to the next day
-    current_date=$(date -I -d "$current_date +1 day")  # Use ISO format to increment the date
+    # Increment the date by 1 day
+    current_date=$(increment_date "$current_date")
 done
 
 # Push the commits to the main branch
 git push origin main
 
-echo "✅ Done creating randomized commits for April 2024 to September 2024 with weekend focus and skipped days, and pushed to main!"
+echo "✅ Done creating randomized commits for $start_date with a focus on weekends and skipped days, and pushed to main!"

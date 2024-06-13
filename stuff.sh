@@ -4,13 +4,13 @@
 start_date=$(date -d "2 years ago" +%Y-%m-%d)
 
 # How many days (approx 2 years)
-days=730
+days=497
 
 # Create the file if it doesn't exist
 touch green.txt
 
 # Loop through each day
-for ((i=0; i<$days; i++))
+for ((i=400; i<$days; i++))
 do
     # Get the day of the week (0=Sunday, 6=Saturday)
     day_of_week=$(date -d "$start_date +$i days" +%u)
