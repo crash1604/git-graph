@@ -1,27 +1,41 @@
 #!/bin/bash
 
-# Start date: 1 year ago, on Sunday
-start_date=$(date -d "last year last sunday" +%Y-%m-%d)
+# Start from 2 years ago
+start_date=$(date -d "2 years ago" +%Y-%m-%d)
 
-# Days to commit (pixel positions)
-pixels=(
-  # Example: (week day)
-  "0 0" "0 2" "0 4" "0 6"
-  "1 0" "1 2" "1 4" "1 6"
-  "2 0" "2 1" "2 2" "2 3" "2 4" "2 5" "2 6"
-  "3 0" "3 2" "3 4" "3 6"
-  "4 0" "4 2" "4 4" "4 6"
-)
+# How many days (approx 2 years)
+days=730
 
-for pixel in "${pixels[@]}"; do
-  week=$(echo $pixel | cut -d' ' -f1)
-  day=$(echo $pixel | cut -d' ' -f2)
-  
-  # Calculate date
-  commit_date=$(date -d "$start_date +$((week * 7 + day)) days" "+%Y-%m-%dT12:00:00")
-  
-  # Make a fake commit
-  echo "$commit_date Hello pixel" >> README.md
-  git add README.md
-  GIT_AUTHOR_DATE="$commit_date" GIT_COMMITTER_DATE="$commit_date" git commit -m "Pixel at week $week day $day"
+# Create the file if it doesn't exist
+touch green.txt
+
+# Loop through each day
+for ((i=0; i<$days; i++))
+do
+    # Get the day of the week (0=Sunday, 6=Saturday)
+    day_of_week=$(date -d "$start_date +$i days" +%u)
+
+    # Weekend logic: reduce commits on weekends (0 or 6)
+    if ((day_of_week == 6 || day_of_week == 7)); then
+        commits_today=$((RANDOM % 5))  # Fewer commits on weekends (0-4)
+    else
+        commits_today=$((RANDOM % 11))  # More commits on weekdays (0-10)
+    fi
+
+    # Only commit if commits_today > 0
+    if (( commits_today > 0 )); then
+        commit_date=$(date -d "$start_date +$i days" "+%Y-%m-%dT12:00:00")
+
+        for ((j=0; j<$commits_today; j++))
+        do
+            echo "$commit_date Commit #$j" >> green.txt
+            git add green.txt
+            GIT_AUTHOR_DATE="$commit_date" GIT_COMMITTER_DATE="$commit_date" git commit -m "Commit on $commit_date #$j"
+        done
+    fi
 done
+
+# Push the commits to the main branch
+git push origin main
+
+echo "✅ Done creating randomized commits for 2 years with weekend logic, and pushed to main!"
